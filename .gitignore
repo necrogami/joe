@@ -3,3 +3,8 @@
 composer.lock
 /build/
 commit_message.txt
+/buildroot/
+/downloads/
+/pkgroot/
+/source/
+/joe

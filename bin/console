@@ -23,7 +23,7 @@ if (!$autoloaderFound) {
     exit(1);
 }
 
-use Symfony\Component\Console\Application;
+use App\Console\Application;
 use App\Command\WelcomeCommand;
 use App\Command\UpdateCommand;
 use App\Command\ZoneCreateCommand;
@@ -33,7 +33,16 @@ use App\Command\ZoneDeployCommand;
 // Create the Application
 $application = new Application();
 $application->setName('DNS Taxi - Joe');
-$application->setVersion('1.0.0');
+
+// Use the version from the build process if available, otherwise use a default version
+if (defined('package_version')) {
+    $version = package_version;
+    // Remove 'v' prefix if present
+    $version = ltrim($version, 'v');
+} else {
+    $version = '1.0.0'; // Default version for local development
+}
+$application->setVersion($version);
 
 // Register commands
 $application->add(new WelcomeCommand());
