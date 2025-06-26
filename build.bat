@@ -24,7 +24,7 @@ if %ERRORLEVEL% EQU 0 (
     static-php-cli init
     static-php-cli config:set source.path=build/joe.phar
     static-php-cli config:set output.path=build/joe
-    static-php-cli config:set php.version=8.1
+    static-php-cli config:set php.version=8.4
     static-php-cli config:set php.extensions=phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader
     static-php-cli build:binary
 

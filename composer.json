@@ -3,7 +3,7 @@
     "description": "DNS Taxi - Joe: A utility tool to build and manage DNS zone files on remote DNS servers",
     "type": "project",
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.4",
         "symfony/console": "^5.4"
     },
     "require-dev": {
