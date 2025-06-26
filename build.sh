@@ -29,6 +29,10 @@ if command -v spc &> /dev/null; then
     echo "Downloading PHP and extensions..."
     spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
 
+    # Install UPX package
+    echo "Installing UPX package..."
+    spc install-pkg upx
+
     # Build static binary with micro SAPI
     echo "Building static binary with micro SAPI..."
     spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
