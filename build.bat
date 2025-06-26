@@ -15,23 +15,34 @@ vendor\bin\box compile
 echo Build completed successfully!
 echo PHAR file is available at: build\joe.phar
 
-REM Check if php-static-cli is available
-where static-php-cli >nul 2>nul
+REM Check if spc is available
+where spc >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
-    echo PHP-Static-CLI found, building static binary...
+    echo spc (static-php-cli) found, building static binary...
 
-    REM Build static binary
-    static-php-cli init
-    static-php-cli config:set source.path=build/joe.phar
-    static-php-cli config:set output.path=build/joe
-    static-php-cli config:set php.version=8.4
-    static-php-cli config:set php.extensions=phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader
-    static-php-cli build:binary
+    REM Check system dependencies
+    echo Checking system dependencies...
+    spc doctor --auto-fix
 
-    echo Static binary is available at: build\joe
+    REM Download PHP and extensions
+    echo Downloading PHP and extensions...
+    spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
+
+    REM Build static binary with micro SAPI
+    echo Building static binary with micro SAPI...
+    spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
+
+    REM Combine micro.sfx with the PHAR file
+    echo Combining micro.sfx with PHAR file...
+    spc micro:combine build\joe.phar
+
+    REM Move the combined binary to the correct location
+    move .\micro.sfx build\joe.exe
+
+    echo Static binary is available at: build\joe.exe
 ) else (
-    echo PHP-Static-CLI not found. Only PHAR file was built.
-    echo To build a static binary, install php-static-cli and run this script again.
+    echo spc (static-php-cli) not found. Only PHAR file was built.
+    echo To build a static binary, download spc from https://dl.static-php.dev/static-php-cli/spc-bin/nightly/ and run this script again.
 )
 
 echo.

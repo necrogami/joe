@@ -17,22 +17,33 @@ vendor/bin/box compile
 echo "Build completed successfully!"
 echo "PHAR file is available at: build/joe.phar"
 
-# Check if php-static-cli is available
-if command -v static-php-cli &> /dev/null; then
-    echo "PHP-Static-CLI found, building static binary..."
+# Check if spc is available
+if command -v spc &> /dev/null; then
+    echo "spc (static-php-cli) found, building static binary..."
 
-    # Build static binary
-    static-php-cli init
-    static-php-cli config:set source.path=build/joe.phar
-    static-php-cli config:set output.path=build/joe
-    static-php-cli config:set php.version=8.4
-    static-php-cli config:set php.extensions=phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader
-    static-php-cli build:binary
+    # Check system dependencies
+    echo "Checking system dependencies..."
+    spc doctor --auto-fix
+
+    # Download PHP and extensions
+    echo "Downloading PHP and extensions..."
+    spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
+
+    # Build static binary with micro SAPI
+    echo "Building static binary with micro SAPI..."
+    spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
+
+    # Combine micro.sfx with the PHAR file
+    echo "Combining micro.sfx with PHAR file..."
+    spc micro:combine build/joe.phar
+
+    # Move the combined binary to the correct location
+    mv ./micro.sfx build/joe
 
     echo "Static binary is available at: build/joe"
 else
     echo "PHP-Static-CLI not found. Only PHAR file was built."
-    echo "To build a static binary, install php-static-cli and run this script again."
+    echo "To build a static binary, download spc from https://dl.static-php.dev/static-php-cli/spc-bin/nightly/ and run this script again."
 fi
 
 echo ""

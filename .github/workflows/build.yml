@@ -29,20 +29,25 @@ jobs:
       - name: Build PHAR with Box
         run: vendor/bin/box compile
 
-      - name: Install php-static-cli
+      - name: Download php-static-cli
         run: |
-          curl -L https://github.com/crazywhalecc/static-php-cli/releases/download/v0.1.0/static-php-cli-v0.1.0-linux-x64.phar -o static-php-cli.phar
-          chmod +x static-php-cli.phar
-          sudo mv static-php-cli.phar /usr/local/bin/static-php-cli
+          curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+          chmod +x spc
+          sudo mv spc /usr/local/bin/spc
 
-      - name: Build static binary
+      - name: Check system dependencies
         run: |
-          static-php-cli init
-          static-php-cli config:set source.path=build/joe.phar
-          static-php-cli config:set output.path=build/joe
-          static-php-cli config:set php.version=8.4
-          static-php-cli config:set php.extensions=phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader
-          static-php-cli build:binary
+          spc doctor --auto-fix
+
+      - name: Download PHP and extensions
+        run: |
+          spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
+
+      - name: Build static binary with micro SAPI
+        run: |
+          spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
+          spc micro:combine build/joe.phar
+          mv ./micro.sfx build/joe
 
       - name: Create Release
         id: create_release
