@@ -39,10 +39,10 @@ if command -v spc &> /dev/null; then
 
     # Combine micro.sfx with the PHAR file
     echo "Combining micro.sfx with PHAR file..."
-    spc micro:combine build/joe.phar
+    spc micro:combine build/joe.phar --output=joe
 
     # Move the combined binary to the correct location
-    mv ./micro.sfx build/joe
+    mv ./joe build/joe
 
     echo "Static binary is available at: build/joe"
 else

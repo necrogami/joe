@@ -38,10 +38,10 @@ if %ERRORLEVEL% EQU 0 (
 
     REM Combine micro.sfx with the PHAR file
     echo Combining micro.sfx with PHAR file...
-    spc micro:combine build\joe.phar
+    spc micro:combine build\joe.phar --output=joe
 
     REM Move the combined binary to the correct location
-    move .\micro.sfx build\joe.exe
+    move .\joe build\joe.exe
 
     echo Static binary is available at: build\joe.exe
 ) else (

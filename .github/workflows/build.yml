@@ -50,8 +50,8 @@ jobs:
       - name: Build static binary with micro SAPI
         run: |
           spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
-          spc micro:combine build/joe.phar
-          mv ./micro.sfx build/joe
+          spc micro:combine build/joe.phar --output=joe
+          mv ./joe build/joe
 
       - name: Create Release
         id: create_release
