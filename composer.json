@@ -4,7 +4,8 @@
     "type": "project",
     "require": {
         "php": ">=8.4",
-        "symfony/console": "^5.4"
+        "symfony/console": "^6.0",
+        "psr/log": "^3.0"
     },
     "require-dev": {
         "humbug/box": "^4.3"
