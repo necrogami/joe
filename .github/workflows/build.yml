@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, json, libxml, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      - name: Build PHAR with Box
+        run: vendor/bin/box compile
+
+      - name: Install php-static-cli
+        run: |
+          curl -L https://github.com/crazywhalecc/static-php-cli/releases/download/v0.1.0/static-php-cli-v0.1.0-linux-x64.phar -o static-php-cli.phar
+          chmod +x static-php-cli.phar
+          sudo mv static-php-cli.phar /usr/local/bin/static-php-cli
+
+      - name: Build static binary
+        run: |
+          static-php-cli init
+          static-php-cli config:set source.path=build/joe.phar
+          static-php-cli config:set output.path=build/joe
+          static-php-cli config:set php.version=8.1
+          static-php-cli config:set php.extensions=phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader
+          static-php-cli build:binary
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload PHAR Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/joe.phar
+          asset_name: joe.phar
+          asset_content_type: application/octet-stream
+
+      - name: Upload Binary Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/joe
+          asset_name: joe
+          asset_content_type: application/octet-stream

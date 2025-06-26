@@ -1,0 +1,30 @@
+{
+    "banner": [
+        "This file is part of DNS Taxi - Joe.",
+        "A utility tool to build and manage DNS zone files on remote DNS servers.",
+        "",
+        "This source file is subject to the MIT license that is bundled",
+        "with this source code in the file LICENSE."
+    ],
+    "chmod": "0755",
+    "compactors": [
+        "KevinGH\\Box\\Compactor\\Php",
+        "KevinGH\\Box\\Compactor\\Json"
+    ],
+    "directories": ["src"],
+    "files": [
+        "composer.json",
+        "LICENSE"
+    ],
+    "finder": [
+        {
+            "name": "*.php",
+            "exclude": ["Tests", "tests", "test"],
+            "in": "vendor"
+        }
+    ],
+    "git-version": "package_version",
+    "main": "bin/console",
+    "output": "build/joe.phar",
+    "stub": true
+}

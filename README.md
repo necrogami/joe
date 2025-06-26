@@ -1,0 +1,239 @@
+# DNS Taxi - Joe
+
+A utility tool to build and manage DNS zone files on remote DNS servers.
+
+## Installation
+
+1. Clone this repository
+2. Install dependencies:
+   ```
+   composer install
+   ```
+
+## Usage
+
+Run the application:
+
+```
+php bin\console
+```
+
+This will display a welcome message and overview of available commands.
+
+### DNS Zone Management Commands
+
+The application provides several commands for managing DNS zone files:
+
+#### Creating Zone Files
+
+Create a new DNS zone file:
+
+```
+php bin\console zone:create example.com --output=example.com.zone
+```
+
+Options:
+- `--nameserver` (`-ns`): Specify nameservers (can be used multiple times)
+- `--admin-email` (`-e`): Admin email for the zone file
+- `--ttl` (`-t`): Default TTL for the zone file
+- `--output` (`-o`): Output file path
+
+#### Listing Zone Files
+
+List DNS zone files on a remote server:
+
+```
+php bin\console zone:list --server=dns1.example.com --user=admin
+```
+
+Options:
+- `--server` (`-s`): Remote DNS server to connect to
+- `--user` (`-u`): Username for remote server authentication
+- `--key` (`-k`): SSH key file for authentication
+- `--filter` (`-f`): Filter zones by domain name pattern
+
+#### Deploying Zone Files
+
+Deploy a DNS zone file to a remote server:
+
+```
+php bin\console zone:deploy example.com.zone --server=dns1.example.com --user=admin --reload
+```
+
+Options:
+- `--server` (`-s`): Remote DNS server to deploy to
+- `--user` (`-u`): Username for remote server authentication
+- `--key` (`-k`): SSH key file for authentication
+- `--reload` (`-r`): Reload DNS server after deployment
+- `--dry-run` (`-d`): Simulate deployment without making changes
+
+### Update Command
+
+The application includes an update command that checks for new versions and updates the application:
+
+```
+php bin\console app:update
+```
+
+This command:
+1. Checks the current application version
+2. Queries GitHub for the latest release version
+3. If a newer version is available, offers to download and install it
+4. Handles the update process for both PHAR and binary versions
+
+The update command uses the GitHub API to check for updates. By default, it will try to determine the repository information from the environment. You can override this by setting the following environment variables:
+
+- `APP_GITHUB_OWNER`: The GitHub repository owner
+- `APP_GITHUB_REPO`: The GitHub repository name
+
+## Building the Application
+
+### Building a PHAR Archive
+
+You can build a PHAR archive of the application using [Box](https://github.com/box-project/box):
+
+```
+composer install --no-dev --optimize-autoloader
+vendor\bin\box compile
+```
+
+This will create a PHAR file in the `build` directory. You can run it with:
+
+```
+php build\joe.phar
+```
+
+### Building a Static Binary
+
+You can build a static binary using [php-static-cli](https://github.com/crazywhalecc/static-php-cli):
+
+1. First, build the PHAR archive as described above
+2. Install php-static-cli
+3. Build the static binary:
+
+```
+static-php-cli init
+static-php-cli config:set source.path=build/joe.phar
+static-php-cli config:set output.path=build/joe
+static-php-cli config:set php.version=8.1
+static-php-cli config:set php.extensions=phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader
+static-php-cli build:binary
+```
+
+The resulting binary will be in the `build` directory and can be run directly:
+
+```
+build\joe
+```
+
+### Local Build Script for Testing
+
+For local testing, build scripts are provided that automate the build process:
+
+#### Windows
+
+```
+build.bat
+```
+
+#### Linux/WSL
+
+```
+./build.sh
+```
+
+Note: In Linux/WSL environments, you may need to make the script executable first:
+
+```
+chmod +x build.sh
+```
+
+These scripts:
+1. Install dependencies with `--no-dev --optimize-autoloader` flags
+2. Create the build directory if it doesn't exist
+3. Build the PHAR file using Box
+4. Check if php-static-cli is available and build a static binary if it is
+
+The build outputs are automatically ignored by git (added to .gitignore) so they won't be committed to the repository.
+
+## Automated Builds with GitHub Actions
+
+This project includes a GitHub Actions workflow that automatically builds both the PHAR archive and the static binary when a new tag is pushed. The workflow:
+
+1. Builds a PHAR archive using Box
+2. Builds a static binary using php-static-cli
+3. Creates a GitHub release
+4. Uploads both the PHAR and the static binary as release assets
+
+To trigger a build, push a tag starting with `v`:
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This will create a new release with the following assets:
+- `joe.phar`: The PHAR archive that can be run with PHP
+- `joe`: The static binary that can be run directly without PHP installed
+
+## Adding New Commands
+
+To add new DNS zone management commands:
+
+1. Create a new command class in the `src/Command` directory
+2. Register the command in `bin/console`
+
+Example command class:
+
+```php
+<?php
+
+namespace App\Command;
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+
+class ZoneVerifyCommand extends Command
+{
+    protected static $defaultName = 'zone:verify';
+    protected static $defaultDescription = 'Verifies the syntax of a DNS zone file';
+
+    protected function configure(): void
+    {
+        $this
+            ->setDescription(self::$defaultDescription)
+            ->addArgument('file', InputArgument::REQUIRED, 'Path to the zone file to verify')
+            ->addOption('verbose', 'v', InputOption::VALUE_NONE, 'Show detailed verification results');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $filePath = $input->getArgument('file');
+        $verbose = $input->getOption('verbose');
+
+        $io->title("Verifying DNS zone file: $filePath");
+
+        // Your verification logic here
+
+        $io->success("Zone file verified successfully");
+        return Command::SUCCESS;
+    }
+}
+```
+
+Then register it in `bin/console`:
+
+```php
+// Register commands
+$application->add(new WelcomeCommand());
+$application->add(new UpdateCommand());
+$application->add(new ZoneCreateCommand());
+$application->add(new ZoneListCommand());
+$application->add(new ZoneDeployCommand());
+$application->add(new ZoneVerifyCommand()); // Add your new command here
+```

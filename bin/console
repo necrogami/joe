@@ -1,0 +1,49 @@
+#!/usr/bin/env php
+<?php
+
+// Determine if we're running from a PHAR or from source
+$rootDir = dirname(__DIR__);
+$autoloadPaths = [
+    $rootDir . '/vendor/autoload.php',                      // Running from source
+    $rootDir . '/../../autoload.php',                       // Running as a Composer dependency
+    'phar://app.phar/vendor/autoload.php',                  // Running from PHAR
+];
+
+$autoloaderFound = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require $autoloadPath;
+        $autoloaderFound = true;
+        break;
+    }
+}
+
+if (!$autoloaderFound) {
+    fwrite(STDERR, 'Autoloader not found. Run "composer install" to set up dependencies.' . PHP_EOL);
+    exit(1);
+}
+
+use Symfony\Component\Console\Application;
+use App\Command\WelcomeCommand;
+use App\Command\UpdateCommand;
+use App\Command\ZoneCreateCommand;
+use App\Command\ZoneListCommand;
+use App\Command\ZoneDeployCommand;
+
+// Create the Application
+$application = new Application();
+$application->setName('DNS Taxi - Joe');
+$application->setVersion('1.0.0');
+
+// Register commands
+$application->add(new WelcomeCommand());
+$application->add(new UpdateCommand());
+$application->add(new ZoneCreateCommand());
+$application->add(new ZoneListCommand());
+$application->add(new ZoneDeployCommand());
+
+// Set the default command to run when no command is specified
+$application->setDefaultCommand('welcome');
+
+// Run the application
+$application->run();
