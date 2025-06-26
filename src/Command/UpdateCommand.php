@@ -63,8 +63,8 @@ class UpdateCommand extends Command
     private function getLatestVersion(): string
     {
         // Get repository information from environment or use default
-        $repoOwner = getenv('GITHUB_REPOSITORY_OWNER') ?: 'owner';
-        $repoName = getenv('GITHUB_REPOSITORY') ? explode('/', getenv('GITHUB_REPOSITORY'))[1] : 'repo';
+        $repoOwner = getenv('GITHUB_REPOSITORY_OWNER') ?: 'necrogami';
+        $repoName = getenv('GITHUB_REPOSITORY') ? explode('/', getenv('GITHUB_REPOSITORY'))[1] : 'joe';
 
         // Allow override through environment variables
         $repoOwner = getenv('APP_GITHUB_OWNER') ?: $repoOwner;
@@ -123,8 +123,8 @@ class UpdateCommand extends Command
         $assetName = $isPhar ? 'app.phar' : 'app';
 
         // Get repository information from environment or use default
-        $repoOwner = getenv('GITHUB_REPOSITORY_OWNER') ?: 'owner';
-        $repoName = getenv('GITHUB_REPOSITORY') ? explode('/', getenv('GITHUB_REPOSITORY'))[1] : 'repo';
+        $repoOwner = getenv('GITHUB_REPOSITORY_OWNER') ?: 'necrogami';
+        $repoName = getenv('GITHUB_REPOSITORY') ? explode('/', getenv('GITHUB_REPOSITORY'))[1] : 'joe';
 
         // Allow override through environment variables
         $repoOwner = getenv('APP_GITHUB_OWNER') ?: $repoOwner;

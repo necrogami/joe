@@ -41,7 +41,7 @@ jobs:
 
       - name: Download PHP and extensions
         run: |
-          spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
+          spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv" --with-php=8.4 --prefer-pre-built
 
       - name: Install UPX package
         run: |
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build static binary with micro SAPI
         run: |
-          spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
+          spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv" --build-micro --with-upx-pack
           spc micro:combine build/joe.phar --output=joe
           mv ./joe build/joe
 

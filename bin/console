@@ -43,7 +43,7 @@ $application->add(new ZoneListCommand());
 $application->add(new ZoneDeployCommand());
 
 // Set the default command to run when no command is specified
-$application->setDefaultCommand('welcome');
+//$application->setDefaultCommand('welcome');
 
 // Run the application
 $application->run();

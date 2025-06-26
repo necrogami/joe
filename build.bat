@@ -34,7 +34,7 @@ if %ERRORLEVEL% EQU 0 (
 
     REM Build static binary with micro SAPI
     echo Building static binary with micro SAPI...
-    spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
+    spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv" --build-micro --with-upx-pack
 
     REM Combine micro.sfx with the PHAR file
     echo Combining micro.sfx with PHAR file...

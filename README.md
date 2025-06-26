@@ -123,11 +123,11 @@ You can build a static binary using [static-php-cli](https://github.com/crazywha
    ```
 4. Download PHP and required extensions:
    ```
-   spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
+   spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv" --with-php=8.4 --prefer-pre-built
    ```
 5. Build the static binary with micro SAPI:
    ```
-   spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --build-micro --with-upx-pack
+   spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv" --build-micro --with-upx-pack
    ```
 6. Combine the micro.sfx with the PHAR file:
    ```
