@@ -26,7 +26,7 @@ if %ERRORLEVEL% EQU 0 (
 
     REM Download PHP and extensions
     echo Downloading PHP and extensions...
-    spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader" --with-php=8.4 --prefer-pre-built
+    spc download --for-extensions="phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv,curl" --with-php=8.4 --prefer-pre-built
 
     REM Install UPX package
     echo Installing UPX package...
@@ -34,7 +34,7 @@ if %ERRORLEVEL% EQU 0 (
 
     REM Build static binary with micro SAPI
     echo Building static binary with micro SAPI...
-    spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv" --build-micro --with-upx-pack
+    spc build "phar,json,mbstring,tokenizer,ctype,fileinfo,pcntl,posix,dom,xml,simplexml,xmlwriter,xmlreader,iconv,curl" --build-micro --with-upx-pack
 
     REM Combine micro.sfx with the PHAR file
     echo Combining micro.sfx with PHAR file...

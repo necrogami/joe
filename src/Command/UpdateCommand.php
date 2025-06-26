@@ -7,6 +7,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * This command checks for updates and updates the application if a new version is available.
+ * 
+ * Note: This command uses cURL for HTTP requests instead of file_get_contents() to avoid
+ * issues with the HTTPS wrapper not being available in some PHP installations.
+ */
+
 class UpdateCommand extends Command
 {
     // The name of the command (the part after "bin/console")
@@ -62,6 +69,11 @@ class UpdateCommand extends Command
      */
     private function getLatestVersion(): string
     {
+        // Check if cURL is available
+        if (!function_exists('curl_init')) {
+            throw new \Exception('cURL extension is not available. Please install or enable the cURL extension for PHP.');
+        }
+
         // Get repository information from environment or use default
         $repoOwner = getenv('GITHUB_REPOSITORY_OWNER') ?: 'necrogami';
         $repoName = getenv('GITHUB_REPOSITORY') ? explode('/', getenv('GITHUB_REPOSITORY'))[1] : 'joe';
@@ -71,20 +83,25 @@ class UpdateCommand extends Command
         $repoName = getenv('APP_GITHUB_REPO') ?: $repoName;
 
         $url = "https://api.github.com/repos/$repoOwner/$repoName/releases/latest";
-        $options = [
-            'http' => [
-                'method' => 'GET',
-                'header' => [
-                    'User-Agent: PHP'
-                ]
-            ]
-        ];
 
-        $context = stream_context_create($options);
-        $response = file_get_contents($url, false, $context);
+        // Use cURL instead of file_get_contents to avoid issues with HTTPS wrapper
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'PHP');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Skip SSL verification for compatibility
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
         if ($response === false) {
-            throw new \Exception("Failed to connect to GitHub API: $url");
+            throw new \Exception("Failed to connect to GitHub API: $url - $error");
+        }
+
+        if ($httpCode >= 400) {
+            throw new \Exception("GitHub API returned error code: $httpCode");
         }
 
         $data = json_decode($response, true);
@@ -106,6 +123,11 @@ class UpdateCommand extends Command
      */
     private function downloadAndUpdate(string $version, SymfonyStyle $io): void
     {
+        // Check if cURL is available
+        if (!function_exists('curl_init')) {
+            throw new \Exception('cURL extension is not available. Please install or enable the cURL extension for PHP.');
+        }
+
         // Determine if we're running from PHAR or binary
         $isPhar = strpos(__FILE__, 'phar://') === 0;
         $isBinary = PHP_SAPI === 'cli' && !$isPhar;
@@ -140,20 +162,25 @@ class UpdateCommand extends Command
         $io->text("Downloading from: $downloadUrl");
         $io->text("Saving to temporary file: $tempFile");
 
-        $options = [
-            'http' => [
-                'method' => 'GET',
-                'header' => [
-                    'User-Agent: PHP'
-                ]
-            ]
-        ];
+        // Use cURL instead of file_get_contents to avoid issues with HTTPS wrapper
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $downloadUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'PHP');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Skip SSL verification for compatibility
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
 
-        $context = stream_context_create($options);
-        $fileContent = file_get_contents($downloadUrl, false, $context);
+        $fileContent = curl_exec($ch);
+        $error = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
         if ($fileContent === false) {
-            throw new \Exception("Failed to download new version from $downloadUrl");
+            throw new \Exception("Failed to download new version from $downloadUrl - $error");
+        }
+
+        if ($httpCode >= 400) {
+            throw new \Exception("Download failed with HTTP error code: $httpCode");
         }
 
         if (file_put_contents($tempFile, $fileContent) === false) {
